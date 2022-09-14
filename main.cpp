@@ -3,111 +3,77 @@
 #include <ctime>
 #include <fstream>
 
-void fillATM();
-
 int main() {
+    std::cout << "20.4 ATM \n";
     std::srand(std::time(nullptr));
 
-    std::cout << "20.4 ATM \n";
-    std::cout << "Fill the ATM (enter '+')" << std::endl;
-    std::cout << "Withdraw money - enter '-': ";
+    int nominals[6] = {100, 200, 500, 1000, 2000, 5000};
+    int money[1000];
+
+    std::cout << "Your operation (' + ' -  fill ATM, ' - ' - withdraw money ): ";
     std::string answer;
     std::cin >> answer;
 
-    if(answer == "+"){
-        fillATM();
-    } else if( answer == "-"){
+    std::ifstream atm_in("atm.bin", std::ios::binary);
+    if(atm_in.is_open()){
+        atm_in.read((char *)money, sizeof(money));
+        atm_in.close();
+    } else {
+        for (int i = 0; i < 1000; i++){
+            money[i] = 0;
+        }
+    }
 
+    if(answer == "+"){
+        for (int i = 0; i < 1000; i++) {
+            if(money[i] == 0){
+                money[i] = nominals[std::rand() % 6];
+            }
+        }
+
+        std::ofstream atm_out("atm.bin");
+        if(atm_out.is_open()){
+            atm_out.write((char *)money, sizeof(money));
+        } else {
+            std::cout << "Error opening file" << std::endl;
+        }
+        return 0;
+
+    } else if( answer == "-"){
+        std::cout << "Amount: ";
+        int amount;
+        std::cin >> amount;
+
+        if (amount%100 != 0){
+            std::cerr << "Invalid amount " << amount << std::endl;
+            return 1;
+        }
+
+        int amount_to_collect = amount;
+        for(int i = 5; i >= 0; --i ){
+            int nominal = nominals[i];
+            for(int j = 0; j < 1000; j++){
+                if(money[j] == nominal){
+                    if (amount_to_collect >= nominal){
+                        money[j] = 0;
+                        amount_to_collect -= nominal;
+                        if(amount_to_collect == 0){
+                            std::cout << "Amount taken:" << amount << std::endl;
+                            std::ofstream atm_out("atm.bin");
+                            if(atm_out.is_open()){
+                                atm_out.write((char *)money, sizeof(money));
+                                atm_out.close();
+                            } else {
+                                std::cout << "Error opening file" << std::endl;
+                            }
+                            return 0;
+                        }
+                    }
+                }
+            }
+        }
     } else {
         std::cout << "Unknown operation." << std::endl;
     }
-
     return 0;
-}
-
-void fillATM(){
-    int nominal[6] = {100, 200, 500, 1000, 2000, 5000};
-    //открыть на чтение, узнать колличество купюр в банкомате
-    /*
-    std::ofstream atm_out("/home/kate/CLionProjects/20_4_ATM/ATM.txt");
-    atm_out.close();
-     */
-    // открыть на запись  - дописать - либо полностью заполнить?
-    std::ifstream atm_in("/home/kate/CLionProjects/20_4_ATM/ATM.txt");
-    if(atm_in.is_open()) {
-        for (int i = 0; i < 1000; i++) {
-            atm_in >> nominal[std::rand() % 6];
-        }
-        // заполнение файла по типу стека
-    } else {
-        std::cout << "Error opening file" << std::endl;
-    }
-    atm_in.close();
-
-    std::ofstream atm_out("/home/kate/CLionProjects/20_4_ATM/ATM.txt");
-    if(atm_out.is_open()){
-        int cash;
-        while(!atm_out.eof()){
-            atm_out << cash;
-            std::cout << cash;
-        }
-    } else{
-        std::cout << "Error opening file" << std::endl;
-    };
-    atm_out.close();
-}
-
-int withdrow() {
-    int n5000 = 0;
-    int n2000 = 0;
-    int n1000 = 0;
-    int n500 = 0;
-    int n200 = 0;
-    int n100 = 0;
-
-    int N = 0;
-    std::cout << "Введите необходимую сумму (не более 150000р):\n";
-    std::cin >> N;
-
-    if (N%100 != 0){
-        std::cout << "Выдать ровно " << N << " рублей невозможно. Введите сумму, кратную 100:\n";
-        std::cin >> N;
-    }
-
-    if (N > 150000){
-        std::cout << "Банкомат не может выдать за раз более 150 000 рублей. Введите сумму, кратную 100 и не более 150000р:\n";
-        std::cin >> N;
-    }
-
-    if (N >= 5000){
-        n5000 = N/5000;
-        N = N%5000;
-        std::cout << n5000 << " по 5000 \n";
-    }
-    if (N >= 2000){
-        n2000 = N/2000;
-        N = N%2000;
-        std::cout << n2000 << " по 2000 \n";
-    }
-    if (N >= 1000){
-        n1000 = N/1000;
-        N = N%1000;
-        std::cout << n1000 << " по 1000 \n";
-    }
-    if (N >= 500){
-        n500 = N/500;
-        N = N%500;
-        std::cout << n500 << " по 500 \n";
-    }
-    if (N >= 200){
-        n200 = N/200;
-        N = N%200;
-        std::cout << n200 << " по 200 \n";
-    }
-    if (N >= 100){
-        n100 = N/100;
-        N = N%100;
-        std::cout << n100 << " по 100 \n";
-    }
-
 }
