@@ -1,17 +1,13 @@
 #include <iostream>
 #include <string>
+#include <ctime>
+#include <fstream>
 
-int sum_of (int* arr){
-    int sum = 0;
-    int size = sizeof(arr);
-    std::cout << size << " ";
-    for(int i = 0; i < 6 - 1 ; i++){
-        sum += arr[i] + arr[i + 1];
-    }
-    return sum;
-}
+void fillATM();
 
 int main() {
+    std::srand(std::time(nullptr));
+
     std::cout << "20.4 ATM \n";
     std::cout << "Fill the ATM (enter '+')" << std::endl;
     std::cout << "Withdraw money - enter '-': ";
@@ -30,21 +26,36 @@ int main() {
 }
 
 void fillATM(){
-    //0 - 100, 1 - 200, 2 - 500, 3 - 1000, 4 - 2000, 5 - 5000;
-    int nominal[6] = {0, 0, 0, 0, 0, 0};
-
-    while(sum_of(nominal) <= 1000){
-        nominal[std::rand()%6]++;
-    }
-    for(int i = 0; i < 6; i++){
-        std::cout << nominal[i] << " " ;
-    }
-    // заполнение файла по типу стека
+    int nominal[6] = {100, 200, 500, 1000, 2000, 5000};
     //открыть на чтение, узнать колличество купюр в банкомате
+    /*
+    std::ofstream atm_out("/home/kate/CLionProjects/20_4_ATM/ATM.txt");
+    atm_out.close();
+     */
     // открыть на запись  - дописать - либо полностью заполнить?
+    std::ifstream atm_in("/home/kate/CLionProjects/20_4_ATM/ATM.txt");
+    if(atm_in.is_open()) {
+        for (int i = 0; i < 1000; i++) {
+            atm_in >> nominal[std::rand() % 6];
+        }
+        // заполнение файла по типу стека
+    } else {
+        std::cout << "Error opening file" << std::endl;
+    }
+    atm_in.close();
+
+    std::ofstream atm_out("/home/kate/CLionProjects/20_4_ATM/ATM.txt");
+    if(atm_out.is_open()){
+        int cash;
+        while(!atm_out.eof()){
+            atm_out << cash;
+            std::cout << cash;
+        }
+    } else{
+        std::cout << "Error opening file" << std::endl;
+    };
+    atm_out.close();
 }
-
-
 
 int withdrow() {
     int n5000 = 0;
