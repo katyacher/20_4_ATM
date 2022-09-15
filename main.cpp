@@ -10,7 +10,7 @@ int main() {
     int nominals[6] = {100, 200, 500, 1000, 2000, 5000};
     int money[1000];
 
-    std::cout << "Your operation (' + ' -  fill ATM, ' - ' - withdraw money ): ";
+    std::cout << "Fill ATM ('+') or cash withdrawal('-'): ";
     std::string answer;
     std::cin >> answer;
 
@@ -31,34 +31,35 @@ int main() {
             }
         }
 
-        std::ofstream atm_out("atm.bin");
+        std::ofstream atm_out("atm.bin", std::ios::binary);
         if(atm_out.is_open()){
             atm_out.write((char *)money, sizeof(money));
+            std::cout << "ATM filled!" << std::endl;
         } else {
             std::cout << "Error opening file" << std::endl;
         }
         return 0;
 
     } else if( answer == "-"){
-        std::cout << "Amount: ";
+        std::cout << "Enter amount: ";
         int amount;
         std::cin >> amount;
 
         if (amount%100 != 0){
-            std::cerr << "Invalid amount " << amount << std::endl;
+            std::cerr << "Invalid sum " << amount << std::endl;
             return 1;
         }
-
         int amount_to_collect = amount;
+
         for(int i = 5; i >= 0; --i ){
             int nominal = nominals[i];
             for(int j = 0; j < 1000; j++){
                 if(money[j] == nominal){
                     if (amount_to_collect >= nominal){
-                        money[j] = 0;
                         amount_to_collect -= nominal;
+                        money[j] = 0;
                         if(amount_to_collect == 0){
-                            std::cout << "Amount taken:" << amount << std::endl;
+                            std::cout << "Take your money: " << amount << std::endl;
                             std::ofstream atm_out("atm.bin");
                             if(atm_out.is_open()){
                                 atm_out.write((char *)money, sizeof(money));
@@ -71,6 +72,9 @@ int main() {
                     }
                 }
             }
+        }
+        if(amount_to_collect > 0){
+            std::cout << "Operation is not possible." << std::endl;
         }
     } else {
         std::cout << "Unknown operation." << std::endl;
